@@ -87,9 +87,9 @@ def display_stocks_table(data):
 # --- ФРЕЙМ 1: Интересные акции для покупки (Fair Value) ---
 st.markdown("---")
 st.header("🟢 Interesting Stocks for Purchase (Fair Value)")
-st.write(
-    "Companies with attractive valuation and potential according to your evaluation model."
-)
+# st.write(
+#     "Companies with attractive valuation and potential according to your evaluation model."
+# )
 
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
@@ -108,9 +108,9 @@ for idx, ind_key in enumerate(tab_keys):
 # --- ФРЕЙМ 2: Переоцененные акции (Overvalued) ---
 st.markdown("---")
 st.header("🔴 Overvalued Stocks")
-st.write(
-    "Companies trading above their calculated fair value."
-)
+# st.write(
+#     "Companies trading above their calculated fair value."
+# )
 
 over_tabs = st.tabs(tab_labels)
 
