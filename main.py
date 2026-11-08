@@ -36,7 +36,7 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
     """
     try:
         endpoint = f"{BACKEND_URL}/tsx_stocks/{category}/{industry_key}"
-        response = requests.get(endpoint, timeout=15)
+        response = requests.get(endpoint, timeout=60)
 
         if response.status_code == 200:
             return response.json()
