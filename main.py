@@ -5,7 +5,7 @@ import requests
 import streamlit as st
 
 # Базовый URL вашего бэкенда на Render
-BACKEND_URL = os.getenv("BACKEND_URL", "https://svapp-r5d4.onrender.com")
+BACKEND_URL = os.getenv("BACKEND_URL")
 
 st.set_page_config(
     page_title="TSX Stock Screener", page_icon="📊", layout="wide"
@@ -35,7 +35,7 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
     industry_key: 'Financials', 'Energy' и т.д.
     """
     try:
-        endpoint = f"{BACKEND_URL}/tsx_stocks/{category}/{industry_key}"
+        endpoint = f"{BACKEND_URL}tsx-stocks-fair-value/GET/tsx_stocks/{category}/{industry_key}"
         response = requests.get(endpoint, timeout=15)
 
         if response.status_code == 200:
