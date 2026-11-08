@@ -52,7 +52,11 @@ def display_stocks_table(data):
         st.info("В данной категории пока нет данных.")
         return
 
-    df = pd.DataFrame(data)
+    if isinstance(data, dict):
+        df = pd.DataFrame([data])
+    else:
+        df = pd.DataFrame(data)
+    
 
     # Переименуем колонки для красивого отображения пользователю
     rename_map = {
