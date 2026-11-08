@@ -35,7 +35,7 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
     industry_key: 'Financials', 'Energy' и т.д.
     """
     try:
-        endpoint = f"{BACKEND_URL}tsx-stocks-fair-value/GET/tsx_stocks/{category}/{industry_key}"
+        endpoint = f"{BACKEND_URL}/tsx-stocks-fair-value/GET/tsx_stocks/{category}/{industry_key}"
         response = requests.get(endpoint, timeout=15)
 
         if response.status_code == 200:
@@ -72,6 +72,7 @@ def display_stocks_table(data):
     # Выводим интерактивную таблицу Streamlit
     st.dataframe(df, use_container_width=True, hide_index=True)
 
+#--------------------------- main ---------------------------------------------
 
 # --- ФРЕЙМ 1: Интересные акции для покупки (Fair Value) ---
 st.markdown("---")
