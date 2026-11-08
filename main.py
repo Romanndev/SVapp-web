@@ -8,10 +8,10 @@ import streamlit as st
 BACKEND_URL = os.getenv("BACKEND_URL")
 
 st.set_page_config(
-    page_title="TSX Stock Screener", page_icon="📊", layout="wide"
+    page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-st.title("📊 Canadian Stock Screener (TSX-Index VCN)")
+st.title("📊 Canadian Stocks Screener (TSX-Index VCN)")
 st.write(
     "Fair value and margin of safety analysis of stocks by industry. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
 )
