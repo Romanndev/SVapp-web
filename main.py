@@ -86,7 +86,7 @@ def display_stocks_table(data):
 
 # --- ФРЕЙМ 1: Интересные акции для покупки (Fair Value) ---
 st.markdown("---")
-st.header("🟢 Interesting Stocks for Purchase (Fair Value)")
+st.header("🟢 Interesting Stocks (Fair Value)")
 # st.write(
 #     "Companies with attractive valuation and potential according to your evaluation model."
 # )
