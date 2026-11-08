@@ -18,12 +18,18 @@ st.write(
 
 # Список отраслей, доступных на бэкенде
 INDUSTRIES = {
-    "Financials": "Финансы",
-    "Energy": "Энергетика",
-    "Technology": "Технологии",
-    "Utilities": "Коммунальные услуги",
-    "Healthcare": "Здравоохранение",
-    "Industrials": "Промышленность",
+    "Financials": "Financials",
+    "Basic_Materials": "Basic_Materials",
+    "Energy": "Energy",
+    "Industrials": "Industrials",
+    "Consumer Discretionary": "Consumer Discretionary",
+    "Consumer Staples":"Consumer Staples",
+    "Health care": "Health care",
+    "Technology": "Technology",
+    "Telecommunications": "Telecommunications",
+    "Utilities": "Utilities",
+    "Real Estate": "Real Estate",
+        
 }
 
 
@@ -36,14 +42,14 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
     """
     try:
         endpoint = f"{BACKEND_URL}/tsx_stocks/{category}/{industry_key}"
-        response = requests.get(endpoint, timeout=60)
+        response = requests.get(endpoint, timeout=90)
 
         if response.status_code == 200:
             return response.json()
         else:
-            return []
+            return {"status": "error", "message": f"Ошибка запроса: {response.status_code}"}
     except Exception as e:
-        return []
+        return {"status": "error", "message" : str(e)}
 
 
 # Функция для красивого оформления таблиц под ваш формат данных
