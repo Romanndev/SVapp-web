@@ -11,9 +11,9 @@ st.set_page_config(
     page_title="TSX Stock Screener", page_icon="📊", layout="wide"
 )
 
-st.title("📊 Канадский скринер акций (TSX)")
+st.title("📊 Canadian Stock Screener (TSX)")
 st.write(
-    "Анализ справедливой стоимости и потенциала акций по отраслям на базе вашего бэкенда."
+    "Fair value and margin of safety analysis of stocks by industry. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
 )
 
 # Список отраслей, доступных на бэкенде
@@ -47,7 +47,7 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
         if response.status_code == 200:
             return response.json()
         else:
-            return {"status": "error", "message": f"Ошибка запроса: {response.status_code}"}
+            return {"status": "error", "message": f"Request error: {response.status_code}"}
     except Exception as e:
         return {"status": "error", "message" : str(e)}
 
@@ -55,7 +55,7 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
 # Функция для красивого оформления таблиц под ваш формат данных
 def display_stocks_table(data):
     if not data:
-        st.info("В данной категории пока нет данных.")
+        st.info("No data available for this category.")
         return
 
     if isinstance(data, dict):
@@ -66,14 +66,14 @@ def display_stocks_table(data):
 
     # Переименуем колонки для красивого отображения пользователю
     rename_map = {
-        "ticker": "Тикер",
-        "fullname": "Компания",
-        "price": "Цена (CAD)",
-        "true_price": "Справедливая цена",
-        "currency": "Валюта",
-        "status": "Статус",
-        "update_date": "Дата обновления",
-        "sector": "Сектор",
+        "ticker": "Ticker",
+        "fullname": "Company",
+        "price": "Price (CAD)",
+        "true_price": "Fair Value",
+        "currency": "Currency",
+        "status": "Status",
+        "update_date": "Update Date",
+        "sector": "Sector",
     }
     df = df.rename(
         columns={k: v for k, v in rename_map.items() if k in df.columns}
@@ -86,9 +86,9 @@ def display_stocks_table(data):
 
 # --- ФРЕЙМ 1: Интересные акции для покупки (Fair Value) ---
 st.markdown("---")
-st.header("🟢 Интересные акции для покупки (Fair Value)")
+st.header("🟢 Interesting Stocks for Purchase (Fair Value)")
 st.write(
-    "Компании с привлекательной стоимостью и потенциалом по вашей модели оценки."
+    "Companies with attractive valuation and potential according to your evaluation model."
 )
 
 tab_keys = list(INDUSTRIES.keys())
@@ -98,7 +98,7 @@ buy_tabs = st.tabs(tab_labels)
 
 for idx, ind_key in enumerate(tab_keys):
     with buy_tabs[idx]:
-        st.subheader(f"Отрасль: {INDUSTRIES[ind_key]}")
+        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
 
         # Запрос данных для справедливой стоимости
         data = fetch_stocks_from_backend("fair_value", ind_key)
@@ -107,16 +107,16 @@ for idx, ind_key in enumerate(tab_keys):
 
 # --- ФРЕЙМ 2: Переоцененные акции (Overvalued) ---
 st.markdown("---")
-st.header("🔴 Переоцененные акции (Overvalued)")
+st.header("🔴 Overvalued Stocks")
 st.write(
-    "Компании, торгующиеся выше своей расчетной справедливой стоимости."
+    "Companies trading above their calculated fair value."
 )
 
 over_tabs = st.tabs(tab_labels)
 
 for idx, ind_key in enumerate(tab_keys):
     with over_tabs[idx]:
-        st.subheader(f"Отрасль: {INDUSTRIES[ind_key]}")
+        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
 
         # Запрос данных для переоцененных акций
         data_over = fetch_stocks_from_backend("overvalued", ind_key)
