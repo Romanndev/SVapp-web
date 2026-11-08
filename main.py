@@ -24,7 +24,7 @@ INDUSTRIES = {
     "Industrials": "Industrials",
     "Consumer Discretionary": "Consumer Discretionary",
     "Consumer Staples":"Consumer Staples",
-    "Health care": "Health care",
+    "Health Care": "Health Care",
     "Technology": "Technology",
     "Telecommunications": "Telecommunications",
     "Utilities": "Utilities",
