@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 import streamlit as st
 
-# Базовый URL вашего бэкенда на Render
+# Базовый URL бэкенда
 BACKEND_URL = os.getenv("BACKEND_URL")
 
 st.set_page_config(
@@ -87,9 +87,9 @@ def display_stocks_table(data):
 # --- ФРЕЙМ 1: Интересные акции для покупки (Fair Value) ---
 st.markdown("---")
 st.header("🟢 Interesting Stocks (Fair Value)")
-# st.write(
-#     "Companies with attractive valuation and potential according to your evaluation model."
-# )
+st.write(
+    "Companies with attractive valuation and potential according to the evaluation model. NOT FINANCIAL ADVICE."
+)
 
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
@@ -108,9 +108,9 @@ for idx, ind_key in enumerate(tab_keys):
 # --- ФРЕЙМ 2: Переоцененные акции (Overvalued) ---
 st.markdown("---")
 st.header("🔴 Overvalued Stocks")
-# st.write(
-#     "Companies trading above their calculated fair value."
-# )
+st.write(
+    "Companies are trading above their calculated fair value according to the evaluation model. NOT FINANCIAL ADVICE."
+)
 
 over_tabs = st.tabs(tab_labels)
 
