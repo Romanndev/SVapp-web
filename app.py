@@ -69,7 +69,7 @@ def display_stocks_table(data):
         "ticker": "Ticker",
         "fullname": "Company",
         "price": "Price (CAD)",
-        "true_price": "Fair Value",
+        "true_price": "Fair Value (CAD)",
         "currency": "Currency",
         "status": "Status",
         "update_date": "Update Date",
