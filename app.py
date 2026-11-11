@@ -10,27 +10,30 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Точечные CSS стили для адаптивности:
-# 1. На мобильных и ПК цифры всегда выстраиваются в один ряд вплотную друг к другу.
-# 2. Убираем лишние отступы на ПК, чтобы они не были "на расстоянии выстрела".
+# Продвинутые стили для мобильных и ПК:
+# Принудительно выстраиваем колонки цифр в один ряд без переносов и задаем компактную ширину.
 st.markdown("""
     <style>
-    /* Принудительный ряд для колонок цифр на любых экранах */
+    /* Плотное расположение колонок на любых экранах */
     [data-testid="column"] {
-        width: fit-content !important;
-        flex: 1 !important;
-        min-width: 90px !important;
+        width: auto !important;
+        flex: 0 1 auto !important;
+        min-width: unset !important;
+        margin-right: 25px;
     }
-    div.row-widget.stHorizontal {
+    /* Контейнер для цифр в одну строку */
+    .stocks-row {
         display: flex;
         flex-direction: row;
         align-items: center;
+        gap: 20px;
+        flex-wrap: nowrap;
     }
     .stock-card {
-        padding: 8px 12px;
+        padding: 10px 14px;
         background-color: rgba(150, 150, 150, 0.03);
-        border-radius: 6px;
-        margin-bottom: 6px;
+        border-radius: 8px;
+        margin-bottom: 8px;
         border: 1px solid rgba(150, 150, 150, 0.08);
     }
     </style>
@@ -104,10 +107,10 @@ def display_stocks_blocks(data):
         with st.container():
             st.markdown('<div class="stock-card">', unsafe_allow_html=True)
             
-            # 1. Первая строка: Тикер и название компании
+            # Строка 1: Тикер и название компании
             st.markdown(f"📌 **{ticker}** — *{fullname}*")
 
-            # 2. Вторая строка: Цифры строго в одну линию и компактно
+            # Строка 2: Цифры строго в одну строку и близко друг к другу
             col1, col2, col3 = st.columns(3)
             with col1:
                 st.markdown(f"💵 Price: **{price} {currency}**")
@@ -116,14 +119,13 @@ def display_stocks_blocks(data):
             with col3:
                 st.markdown(f"📈 Upside: **{benefit_str}**")
 
-            # 3. Третья строка: Детали (выпадающий список)
+            # Строка 3: Детали (выпадающий список)
             with st.expander(f"📁 Details / Status ({ticker})"):
                 st.write(f"**Status:** {status}")
                 st.write(f"**Sector:** {sector}")
                 st.write(f"**Updated:** {update_date}")
 
             st.markdown('</div>', unsafe_allow_html=True)
-            st.markdown("---")
 
 # --- Main ---
 category_mode = st.radio(
