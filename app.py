@@ -10,14 +10,14 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Стили для аккуратного отображения карточек на мобильных устройствах и ПК
+# Легкие CSS-стили для аккуратных карточек
 st.markdown("""
     <style>
     .stock-card {
         padding: 10px 14px;
         background-color: rgba(150, 150, 150, 0.04);
         border-radius: 8px;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         border: 1px solid rgba(150, 150, 150, 0.1);
     }
     </style>
@@ -60,7 +60,6 @@ def display_stocks_blocks(data):
         st.info("No data available for this category.")
         return
 
-    # Если бэкенд вернул словарь с сообщением об ошибке
     if isinstance(data, dict):
         if "message" in data:
             st.warning(data["message"])
@@ -93,17 +92,14 @@ def display_stocks_blocks(data):
             # 1. Первая строка: Тикер и название компании
             st.markdown(f"📌 **{ticker}** — *{fullname}*")
 
-            # 2. Вторая строка: Цифры в одну строчку (Price, Fair Value, Upside)
+            # 2. Вторая строка: Все цифры строго в одну линию через колонки
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.markdown(f"💵 **{price} {currency}**")
-                st.caption("Price")
+                st.markdown(f"💵 Price: **{price} {currency}**")
             with col2:
-                st.markdown(f"🎯 **{true_price} {currency}**")
-                st.caption("Fair Value")
+                st.markdown(f"🎯 Fair: **{true_price} {currency}**")
             with col3:
-                st.markdown(f"📈 **{benefit_str}**")
-                st.caption("Upside")
+                st.markdown(f"📈 Upside: **{benefit_str}**")
 
             # 3. Третья строка: Детали (выпадающий список)
             with st.expander(f"📁 Details / Status ({ticker})"):
