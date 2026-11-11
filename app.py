@@ -1,9 +1,9 @@
 import os
-
 import pandas as pd
 import requests
 import streamlit as st
 
+# Базовый URL бэкенда
 BACKEND_URL = os.getenv("BACKEND_URL", "https://svapp-r5d4.onrender.com")
 
 st.set_page_config(
@@ -14,7 +14,6 @@ st.title("📊 Stocks Screener (TSX-Index VCN)")
 st.write(
     "Fair value and margin of safety analysis of stocks by industry. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
 )
-
 
 INDUSTRIES = {
     "Financials": "Financials",
@@ -30,7 +29,6 @@ INDUSTRIES = {
     "Real Estate": "Real Estate",
 }
 
-
 @st.cache_data(ttl=300)
 def fetch_stocks_from_backend(category: str, industry_key: str):
     try:
@@ -43,7 +41,6 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
             return {"status": "error", "message": f"Request error: {response.status_code}"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
-
 
 def display_stocks_blocks(data):
     if not data:
@@ -59,26 +56,45 @@ def display_stocks_blocks(data):
     else:
         items = data
 
-    
     for item in items:
         ticker = item.get("ticker", "N/A")
         fullname = item.get("fullname", "N/A")
         price = item.get("price", "N/A")
         true_price = item.get("true_price", "N/A")
-        currency = item.get("currency", "") 
+        currency = item.get("currency", "CAD")
 
-        
-        with st.expander(f"📌 **{ticker}** — {fullname}"):
-            
-            st.markdown(f"**Price:** {price} {currency} &nbsp;|&nbsp; **Fair Value:** {true_price} {currency}")
-            
-            
-            status = item.get("status")
-            update_date = item.get("update_date")
-            sector = item.get("sector")
-            
-            if status or update_date or sector:
-                st.caption(f"Status: {status} | Updated: {update_date} | Sector: {sector}")
+        status = item.get("status", "N/A")
+        update_date = item.get("update_date", "N/A")
+        sector = item.get("sector", "N/A")
+
+        # Карточка товара / акции
+        with st.container():
+            # Заголовок: ЧТО за продукт (Тикер + Компания) сразу на виду
+            st.markdown(f"### 📌 **{ticker}** — *{fullname}*")
+
+            # Акцентный блок для цены, справедливой стоимости и выгоды
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric(label="💵 Price", value=f"{price} {currency}")
+            with col2:
+                st.metric(label="🎯 Fair Value", value=f"{true_price} {currency}")
+            with col3:
+                # Расчет потенциальной выгоды (Upside / Margin of Safety)
+                try:
+                    p_val = float(price)
+                    tp_val = float(true_price)
+                    benefit_pct = ((tp_val - p_val) / p_val) * 100
+                    st.metric(label="📈 Benefit / Upside", value=f"{benefit_pct:+.1f}%")
+                except (ValueError, TypeError):
+                    st.metric(label="📈 Benefit / Upside", value="N/A")
+
+            # Дополнительная информация в выпадающем списке
+            with st.expander(f"📂 Дополнительно о компании {ticker} (Статус, Сектор, Дата)"):
+                st.write(f"**Status:** {status}")
+                st.write(f"**Sector:** {sector}")
+                st.write(f"**Updated:** {update_date}")
+
+            st.markdown("---")
 
 # --- Main ---
 category_mode = st.radio(
