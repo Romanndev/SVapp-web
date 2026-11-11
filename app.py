@@ -75,7 +75,7 @@ def display_stocks_table(data):
             badge_color = "rgba(150, 150, 150, 0.1)"
             text_color = "inherit"
 
-        # Контейнер с Flexbox: гарантирует нахождение всех метрик в одной строке на любых экранах
+        # Карточка с фиксированным расположением метрик в одну строку
         st.markdown(f"""
         <div style="
             padding: 10px 14px;
@@ -112,33 +112,32 @@ def display_stocks_table(data):
         </div>
         """, unsafe_allow_html=True)
 
-tab_keys = list(INDUSTRIES.keys())
-tab_labels = list(INDUSTRIES.values())
+# Выделенный фильтр по индустриям (общий для обоих разделов)
+selected_industry_label = st.selectbox(
+    "🔍 Select Industry Filter:",
+    options=list(INDUSTRIES.values()),
+    index=0
+)
+
+# Находим ключ выбранной индустрии по ее названию
+selected_industry_key = [k for k, v in INDUSTRIES.items() if v == selected_industry_label][0]
 
 # --- Раздел 1: Interesting Stocks (Fair Value) ---
 st.markdown("---")
 st.header("🟢 Interesting Stocks (Fair Value)")
 st.write(
-    "Companies with attractive valuation and potential according to the evaluation model. NOT FINANCIAL ADVICE."
+    f"Companies with attractive valuation in **{selected_industry_label}**. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
 )
 
-buy_tabs = st.tabs(tab_labels)
-for idx, ind_key in enumerate(tab_keys):
-    with buy_tabs[idx]:
-        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
-        data = fetch_stocks_from_backend("fair_value", ind_key)
-        display_stocks_table(data)
+data_fair = fetch_stocks_from_backend("fair_value", selected_industry_key)
+display_stocks_table(data_fair)
 
 # --- Раздел 2: Overvalued Stocks ---
 st.markdown("---")
 st.header("🔴 Overvalued Stocks")
 st.write(
-    "Companies are trading above their calculated fair value according to the evaluation model. NOT FINANCIAL ADVICE."
+    f"Companies trading above fair value in **{selected_industry_label}**. NOT FINANCIAL ADVICE."
 )
 
-over_tabs = st.tabs(tab_labels)
-for idx, ind_key in enumerate(tab_keys):
-    with over_tabs[idx]:
-        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
-        data_over = fetch_stocks_from_backend("overvalued", ind_key)
-        display_stocks_table(data_over)
+data_over = fetch_stocks_from_backend("overvalued", selected_industry_key)
+display_stocks_table(data_over)
