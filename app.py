@@ -10,14 +10,14 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Компактный CSS для оптимизации отступов на мобильных устройствах
+# Стили для аккуратного отображения карточек на мобильных устройствах и ПК
 st.markdown("""
     <style>
     .stock-card {
-        padding: 8px 12px;
-        background-color: rgba(150, 150, 150, 0.05);
+        padding: 10px 14px;
+        background-color: rgba(150, 150, 150, 0.04);
         border-radius: 8px;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
         border: 1px solid rgba(150, 150, 150, 0.1);
     }
     </style>
@@ -90,26 +90,23 @@ def display_stocks_blocks(data):
             benefit_str = "N/A"
 
         with st.container():
-            # Все ключевые данные (Продукт, Прайс, Справедливая цена, Выгода) выводим на одной строке через колонки
-            col_info, col_price, col_fair, col_benefit = st.columns([3.5, 1.5, 1.5, 1.3])
+            # 1. Первая строка: Тикер и название компании
+            st.markdown(f"📌 **{ticker}** — *{fullname}*")
 
-            with col_info:
-                st.markdown(f"📌 **{ticker}** — *{fullname}*")
-
-            with col_price:
+            # 2. Вторая строка: Цифры в одну строчку (Price, Fair Value, Upside)
+            col1, col2, col3 = st.columns(3)
+            with col1:
                 st.markdown(f"💵 **{price} {currency}**")
                 st.caption("Price")
-
-            with col_fair:
+            with col2:
                 st.markdown(f"🎯 **{true_price} {currency}**")
                 st.caption("Fair Value")
-
-            with col_benefit:
+            with col3:
                 st.markdown(f"📈 **{benefit_str}**")
                 st.caption("Upside")
 
-            # Дополнительная служебная информация спрятана в выпадающий список
-            with st.expander(f"📂 Детали / Статус ({ticker})"):
+            # 3. Третья строка: Детали (выпадающий список)
+            with st.expander(f"📁 Details / Status ({ticker})"):
                 st.write(f"**Status:** {status}")
                 st.write(f"**Sector:** {sector}")
                 st.write(f"**Updated:** {update_date}")
