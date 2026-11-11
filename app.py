@@ -10,27 +10,49 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Профессиональные стили: выделение активных вкладок индустрий и компактные карточки
+# Современные стили (актуальный финтех-дизайн без кислотных плашек)
 st.markdown("""
     <style>
-    /* Кастомизация вкладок (tabs) для максимальной заметности */
+    /* Современный сброс и настройка вкладок (Tabs) */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 12px;
+        border-bottom: 1px solid rgba(150, 150, 150, 0.15);
+        padding-bottom: 4px;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 40px;
-        background-color: rgba(150, 150, 150, 0.05);
-        border-radius: 6px;
-        padding-left: 14px;
-        padding-right: 14px;
+        height: 38px;
+        background-color: transparent;
+        border-radius: 4px;
+        padding-left: 10px;
+        padding-right: 10px;
         font-weight: 500;
-        border: 1px solid rgba(150, 150, 150, 0.1);
+        color: #888;
+        border: none;
+        transition: all 0.2s ease;
     }
+    .stTabs [data-baseweb="tab"]:hover {
+        color: inherit;
+        background-color: rgba(150, 150, 150, 0.05);
+    }
+    /* Активная вкладка: строгий жирный шрифт, акцентный цвет и современное нижнее подчеркивание */
     .stTabs [aria-selected="true"] {
-        background-color: rgba(46, 204, 113, 0.15) !important;
-        border: 1px solid #2ecc71 !important;
-        color: #2ecc71 !important;
+        background-color: transparent !important;
+        color: inherit !important;
         font-weight: 700 !important;
+        box-shadow: inset 0 -2px 0 0 #2ecc71;
+    }
+    
+    /* Карточки акций */
+    .stock-card {
+        padding: 12px 16px;
+        background-color: rgba(150, 150, 150, 0.02);
+        border-radius: 10px;
+        margin-bottom: 8px;
+        border: 1px solid rgba(150, 150, 150, 0.08);
+        transition: border-color 0.2s ease;
+    }
+    .stock-card:hover {
+        border-color: rgba(150, 150, 150, 0.25);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -93,25 +115,18 @@ def display_stocks_table(data):
             tp_val = float(true_price)
             benefit_pct = ((tp_val - p_val) / p_val) * 100
             benefit_str = f"{benefit_pct:+.1f}%"
-            badge_color = "rgba(46, 204, 113, 0.15)" if benefit_pct >= 0 else "rgba(231, 76, 60, 0.15)"
+            badge_color = "rgba(46, 204, 113, 0.12)" if benefit_pct >= 0 else "rgba(231, 76, 60, 0.12)"
             text_color = "#2ecc71" if benefit_pct >= 0 else "#e74c3c"
         except (ValueError, TypeError):
             benefit_str = "N/A"
             badge_color = "rgba(150, 150, 150, 0.1)"
             text_color = "inherit"
 
-        # Карточка с фиксированным расположением метрик в одну строку (адаптивная под мобильные)
+        # Карточка с адаптивным Flexbox расположением в одну строку
         st.markdown(f"""
-        <div style="
-            padding: 10px 14px;
-            background-color: rgba(150, 150, 150, 0.04);
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(150, 150, 150, 0.1);
-            font-size: 14px;
-        ">
-            <div style="margin-bottom: 6px; font-weight: 600;">
-                📌 {ticker} — <span style="color: #666; font-weight: normal; font-size: 13px;">{fullname}</span>
+        <div class="stock-card">
+            <div style="margin-bottom: 6px; font-weight: 600; font-size: 15px;">
+                📌 {ticker} — <span style="color: #777; font-weight: normal; font-size: 13px;">{fullname}</span>
             </div>
             <div style="
                 display: flex;
@@ -122,13 +137,13 @@ def display_stocks_table(data):
                 gap: 8px;
             ">
                 <div style="white-space: nowrap;">
-                    <span style="color: #888; font-size: 11px;">Price:</span><br><b>{price} {currency}</b>
+                    <span style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Price</span><br><b>{price} {currency}</b>
                 </div>
                 <div style="white-space: nowrap;">
-                    <span style="color: #888; font-size: 11px;">Fair Value:</span><br>⚖️ <b>{true_price} {currency}</b>
+                    <span style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Fair Value</span><br>⚖️ <b>{true_price} {currency}</b>
                 </div>
                 <div style="white-space: nowrap; text-align: right;">
-                    <span style="color: #888; font-size: 11px;">Delta:</span><br>
+                    <span style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Delta</span><br>
                     <span style="background-color: {badge_color}; color: {text_color}; padding: 2px 8px; border-radius: 6px; font-weight: 600; display: inline-block;">
                         Δ {benefit_str}
                     </span>
@@ -150,7 +165,7 @@ st.write(
 buy_tabs = st.tabs(tab_labels)
 for idx, ind_key in enumerate(tab_keys):
     with buy_tabs[idx]:
-        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
+        st.markdown(f"### Industry: **{INDUSTRIES[ind_key]}**")
         data = fetch_stocks_from_backend("fair_value", ind_key)
         display_stocks_table(data)
 
@@ -164,6 +179,6 @@ st.write(
 over_tabs = st.tabs(tab_labels)
 for idx, ind_key in enumerate(tab_keys):
     with over_tabs[idx]:
-        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
+        st.markdown(f"### Industry: **{INDUSTRIES[ind_key]}**")
         data_over = fetch_stocks_from_backend("overvalued", ind_key)
         display_stocks_table(data_over)
