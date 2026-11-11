@@ -10,6 +10,19 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
+# Компактный CSS для оптимизации отступов на мобильных устройствах
+st.markdown("""
+    <style>
+    .stock-card {
+        padding: 8px 12px;
+        background-color: rgba(150, 150, 150, 0.05);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        border: 1px solid rgba(150, 150, 150, 0.1);
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("📊 Stocks Screener (TSX-Index VCN)")
 st.write(
     "Fair value and margin of safety analysis of stocks by industry. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
@@ -67,29 +80,36 @@ def display_stocks_blocks(data):
         update_date = item.get("update_date", "N/A")
         sector = item.get("sector", "N/A")
 
-        # Карточка товара / акции
+        # Расчет потенциальной выгоды (Upside)
+        try:
+            p_val = float(price)
+            tp_val = float(true_price)
+            benefit_pct = ((tp_val - p_val) / p_val) * 100
+            benefit_str = f"{benefit_pct:+.1f}%"
+        except (ValueError, TypeError):
+            benefit_str = "N/A"
+
         with st.container():
-            # Заголовок: ЧТО за продукт (Тикер + Компания) сразу на виду
-            st.markdown(f"### 📌 **{ticker}** — *{fullname}*")
+            # Все ключевые данные (Продукт, Прайс, Справедливая цена, Выгода) выводим на одной строке через колонки
+            col_info, col_price, col_fair, col_benefit = st.columns([3.5, 1.5, 1.5, 1.3])
 
-            # Акцентный блок для цены, справедливой стоимости и выгоды
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric(label="💵 Price", value=f"{price} {currency}")
-            with col2:
-                st.metric(label="🎯 Fair Value", value=f"{true_price} {currency}")
-            with col3:
-                # Расчет потенциальной выгоды (Upside / Margin of Safety)
-                try:
-                    p_val = float(price)
-                    tp_val = float(true_price)
-                    benefit_pct = ((tp_val - p_val) / p_val) * 100
-                    st.metric(label="📈 Benefit / Upside", value=f"{benefit_pct:+.1f}%")
-                except (ValueError, TypeError):
-                    st.metric(label="📈 Benefit / Upside", value="N/A")
+            with col_info:
+                st.markdown(f"📌 **{ticker}** — *{fullname}*")
 
-            # Дополнительная информация в выпадающем списке
-            with st.expander(f"📂 Дополнительно о компании {ticker} (Статус, Сектор, Дата)"):
+            with col_price:
+                st.markdown(f"💵 **{price} {currency}**")
+                st.caption("Price")
+
+            with col_fair:
+                st.markdown(f"🎯 **{true_price} {currency}**")
+                st.caption("Fair Value")
+
+            with col_benefit:
+                st.markdown(f"📈 **{benefit_str}**")
+                st.caption("Upside")
+
+            # Дополнительная служебная информация спрятана в выпадающий список
+            with st.expander(f"📂 Детали / Статус ({ticker})"):
                 st.write(f"**Status:** {status}")
                 st.write(f"**Sector:** {sector}")
                 st.write(f"**Updated:** {update_date}")
