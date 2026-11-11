@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Профессиональные стили для аккуратной и компактной финансовой таблицы
+# Профессиональные стили для аккуратной и компактной таблицы
 st.markdown("""
     <style>
     .stock-table {
@@ -91,7 +91,6 @@ def display_stocks_table(data):
     else:
         items = data
 
-    # Формируем компактную таблицу в HTML
     table_html = """
     <table class="stock-table">
         <thead>
@@ -112,7 +111,6 @@ def display_stocks_table(data):
         true_price = item.get("true_price", "N/A")
         currency = item.get("currency", "CAD")
 
-        # Расчет потенциальной выгоды / дисконта и цвета для дельты
         try:
             p_val = float(price)
             tp_val = float(true_price)
@@ -143,7 +141,7 @@ def display_stocks_table(data):
     </table>
     """
 
-    # Обязательно передаем unsafe_allow_html=True, чтобы Streamlit отрендерил HTML-таблицу
+    # Важно: параметр unsafe_allow_html=True обязателен, чтобы HTML отрендерился таблицей
     st.markdown(table_html, unsafe_allow_html=True)
 
 tab_keys = list(INDUSTRIES.keys())
