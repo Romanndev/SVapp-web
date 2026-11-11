@@ -8,7 +8,7 @@ import streamlit as st
 BACKEND_URL = os.getenv("BACKEND_URL")
 
 st.set_page_config(
-    page_title="Stocks Screener", page_icon="📊", layout="wide"
+    page_title="Stocks Screener", page_icon="📊", layout="narrow"
 )
 
 st.title("📊 Canadian Stocks Screener (TSX-Index VCN)")
