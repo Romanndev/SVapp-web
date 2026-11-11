@@ -35,7 +35,6 @@ INDUSTRIES = {
 def fetch_stocks_from_backend(category: str, industry_key: str):
     try:
         endpoint = f"{BACKEND_URL}/tsx_stocks/{category}/{industry_key}"
-        # Увеличенный таймаут (60 сек) на случай холодного старта бэкенда на Render
         response = requests.get(endpoint, timeout=60)
 
         if response.status_code == 200:
@@ -45,50 +44,41 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# Функция для оформления таблиц (без статуса, даты обновления и сектора + с экспандером для названий)
-def display_stocks_table(data):
+# Функция для отображения акций в виде аккуратных блоков вместо таблиц
+def display_stocks_blocks(data):
     if not data:
         st.info("No data available for this category.")
         return
 
+    # Если бэкенд вернул словарь с сообщением об ошибке
     if isinstance(data, dict):
         if "message" in data:
             st.warning(data["message"])
             return
-        df = pd.DataFrame([data])
+        items = [data]
     else:
-        df = pd.DataFrame(data)
+        items = data
 
-    # Удаляем колонки: статус, дата обновления, сектор
-    cols_to_drop = ["status", "update_date", "sector"]
-    df = df.drop(columns=[col for col in cols_to_drop if col in df.columns])
+    # Перебираем каждую акцию и выводим в виде стильного блока
+    for item in items:
+        ticker = item.get("ticker", "N/A")
+        fullname = item.get("fullname", "N/A")
+        price = item.get("price", "N/A")
+        true_price = item.get("true_price", "N/A")
+        currency = item.get("currency", "") # Получаем тип валюты (например, CAD)
 
-    # Переименуем оставшиеся колонки
-    rename_map = {
-        "ticker": "Ticker",
-        "fullname": "Company",
-        "price": "Price (CAD)",
-        "true_price": "Fair Value (CAD)",
-        "currency": "Currency",
-    }
-    df = df.rename(
-        columns={k: v for k, v in rename_map.items() if k in df.columns}
-    )
-
-    # Выводим основную компактную таблицу
-    st.dataframe(df, use_container_width=True, hide_index=True)
-
-    # Раскрывающийся блок с полными названиями компаний и деталями
-    with st.expander("🔍 Подробная информация и полные названия компаний"):
-        for _, row in df.iterrows():
-            ticker = row.get("Ticker", "N/A")
-            company_name = row.get("Company", "N/A")
-            price = row.get("Price (CAD)", "N/A")
-            true_price = row.get("Fair Value (CAD)", "N/A")
+        # Заголовок блока: тикер + полное название компании
+        with st.expander(f"📌 **{ticker}** — {fullname}"):
+            # Выводим цену и справедливую стоимость с добавлением валюты
+            st.markdown(f"**Price:** {price} {currency} &nbsp;|&nbsp; **Fair Value:** {true_price} {currency}")
             
-            st.markdown(f"**{ticker}** — {company_name}")
-            st.caption(f"Price: {price} | Fair Value: {true_price}")
-            st.markdown("---")
+            # Если нужно вывести дополнительные скрытые или детальные поля:
+            status = item.get("status")
+            update_date = item.get("update_date")
+            sector = item.get("sector")
+            
+            if status or update_date or sector:
+                st.caption(f"Status: {status} | Updated: {update_date} | Sector: {sector}")
 
 # --- Main ---
 category_mode = st.radio(
@@ -114,7 +104,7 @@ if "Interesting Stocks" in category_mode:
         with buy_tabs[idx]:
             st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
             data = fetch_stocks_from_backend("fair_value", ind_key)
-            display_stocks_table(data)
+            display_stocks_blocks(data)
 
 # Фрейм 2: Overvalued Stocks
 else:
@@ -130,4 +120,4 @@ else:
         with over_tabs[idx]:
             st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
             data_over = fetch_stocks_from_backend("overvalued", ind_key)
-            display_stocks_table(data_over)
+            display_stocks_blocks(data_over)
