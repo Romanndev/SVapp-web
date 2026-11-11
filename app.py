@@ -10,6 +10,42 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
+# Профессиональные стили для аккуратной и компактной финансовой таблицы
+st.markdown("""
+    <style>
+    .stock-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    .stock-table th {
+        background-color: rgba(150, 150, 150, 0.06);
+        color: inherit;
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(150, 150, 150, 0.2);
+        font-weight: 600;
+    }
+    .stock-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(150, 150, 150, 0.1);
+        vertical-align: middle;
+    }
+    .stock-table tr:hover {
+        background-color: rgba(150, 150, 150, 0.02);
+    }
+    @media (max-width: 768px) {
+        .stock-table {
+            font-size: 12px;
+        }
+        .stock-table td, .stock-table th {
+            padding: 8px 6px;
+        }
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("📊 Stocks Screener (TSX-Index VCN)")
 st.write(
     "Fair value and margin of safety analysis of stocks by industry. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
@@ -55,7 +91,19 @@ def display_stocks_table(data):
     else:
         items = data
 
-    table_data = []
+    table_html = """
+    <table class="stock-table">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Price</th>
+                <th>Fair Value</th>
+                <th>Delta</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
     for item in items:
         ticker = item.get("ticker", "N/A")
         fullname = item.get("fullname", "N/A")
@@ -63,30 +111,38 @@ def display_stocks_table(data):
         true_price = item.get("true_price", "N/A")
         currency = item.get("currency", "CAD")
 
-        # Расчет потенциальной выгоды / дисконта
+        # Расчет потенциальной выгоды / дисконта и цвета для дельты
         try:
             p_val = float(price)
             tp_val = float(true_price)
             benefit_pct = ((tp_val - p_val) / p_val) * 100
             benefit_str = f"{benefit_pct:+.1f}%"
+            badge_color = "rgba(46, 204, 113, 0.15)" if benefit_pct >= 0 else "rgba(231, 76, 60, 0.15)"
+            text_color = "#2ecc71" if benefit_pct >= 0 else "#e74c3c"
         except (ValueError, TypeError):
             benefit_str = "N/A"
+            badge_color = "rgba(150, 150, 150, 0.1)"
+            text_color = "inherit"
 
-        table_data.append({
-            "Company": f"📌 {ticker} — {fullname}",
-            "Price": f"{price} {currency}",
-            "Fair Value": f"⚖️ {true_price} {currency}",
-            "Delta": f"Δ {benefit_str}"
-        })
+        table_html += f"""
+            <tr>
+                <td>📌 <b>{ticker}</b> — <span style="color: #666;">{fullname}</span></td>
+                <td><b>{price} {currency}</b></td>
+                <td>⚖️ <b>{true_price} {currency}</b></td>
+                <td>
+                    <span style="background-color: {badge_color}; color: {text_color}; padding: 3px 8px; border-radius: 6px; font-weight: 600; white-space: nowrap;">
+                        Δ {benefit_str}
+                    </span>
+                </td>
+            </tr>
+        """
 
-    df = pd.DataFrame(table_data)
-    
-    # Отображаем с помощью современной интерактивной таблицы Streamlit
-    st.dataframe(
-        df, 
-        use_container_width=True, 
-        hide_index=True
-    )
+    table_html += """
+        </tbody>
+    </table>
+    """
+
+    st.markdown(table_html, unsafe_allow_html=True)
 
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
