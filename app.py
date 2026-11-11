@@ -10,24 +10,6 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Профессиональные стили для аккуратных карточек-строк
-st.markdown("""
-    <style>
-    .stock-card {
-        padding: 8px 12px;
-        background-color: rgba(150, 150, 150, 0.03);
-        border-radius: 6px;
-        margin-bottom: 6px;
-        border: 1px solid rgba(150, 150, 150, 0.08);
-    }
-    @media (max-width: 768px) {
-        .stock-card {
-            padding: 6px 8px;
-        }
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 st.title("📊 Stocks Screener (TSX-Index VCN)")
 st.write(
     "Fair value and margin of safety analysis of stocks by industry. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
@@ -93,27 +75,42 @@ def display_stocks_table(data):
             badge_color = "rgba(150, 150, 150, 0.1)"
             text_color = "inherit"
 
-        # Отрисовка строки через безопасные колонки Streamlit
-        with st.container():
-            st.markdown('<div class="stock-card">', unsafe_allow_html=True)
-            
-            c1, c2, c3, c4 = st.columns([3, 1.5, 1.5, 1.5])
-            
-            with c1:
-                st.markdown(f"📌 **{ticker}** — <span style='color: #666;'>{fullname}</span>", unsafe_allow_html=True)
-            with c2:
-                st.markdown(f"<span style='color: #888; font-size: 12px;'>Price</span><br><b>{price} {currency}</b>", unsafe_allow_html=True)
-            with c3:
-                st.markdown(f"<span style='color: #888; font-size: 12px;'>Fair Value</span><br>⚖️ <b>{true_price} {currency}</b>", unsafe_allow_html=True)
-            with c4:
-                st.markdown(f"""
-                <span style='color: #888; font-size: 12px;'>Delta</span><br>
-                <span style="background-color: {badge_color}; color: {text_color}; padding: 2px 8px; border-radius: 6px; font-weight: 600; display: inline-block; white-space: nowrap;">
-                    Δ {benefit_str}
-                </span>
-                """, unsafe_allow_html=True)
-                
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Контейнер с Flexbox: гарантирует нахождение всех метрик в одной строке на любых экранах
+        st.markdown(f"""
+        <div style="
+            padding: 10px 14px;
+            background-color: rgba(150, 150, 150, 0.04);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(150, 150, 150, 0.1);
+            font-size: 14px;
+        ">
+            <div style="margin-bottom: 6px; font-weight: 600;">
+                📌 {ticker} — <span style="color: #666; font-weight: normal; font-size: 13px;">{fullname}</span>
+            </div>
+            <div style="
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: nowrap;
+                gap: 8px;
+            ">
+                <div style="white-space: nowrap;">
+                    <span style="color: #888; font-size: 11px;">Price:</span><br><b>{price} {currency}</b>
+                </div>
+                <div style="white-space: nowrap;">
+                    <span style="color: #888; font-size: 11px;">Fair Value:</span><br>⚖️ <b>{true_price} {currency}</b>
+                </div>
+                <div style="white-space: nowrap; text-align: right;">
+                    <span style="color: #888; font-size: 11px;">Delta:</span><br>
+                    <span style="background-color: {badge_color}; color: {text_color}; padding: 2px 8px; border-radius: 6px; font-weight: 600; display: inline-block;">
+                        Δ {benefit_str}
+                    </span>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
