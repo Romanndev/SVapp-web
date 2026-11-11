@@ -3,14 +3,14 @@ import pandas as pd
 import requests
 import streamlit as st
 
-# Базовый URL бэкенда
-BACKEND_URL = os.getenv("BACKEND_URL", "https://svapp-r5d4.onrender.com")
+# Базовый URL бэкенда (подтягивается из secrets Streamlit или os.getenv, либо фоллбек на ваш Render)
+BACKEND_URL = st.secrets.get("BACKEND_URL", os.getenv("BACKEND_URL", "https://svapp-r5d4.onrender.com"))
 
 st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# CSS-стили для компактного отображения цифр в одну строчку на любых экранах
+# Профессиональные стили: компактное расположение метрик в один ряд на любых экранах (ПК и мобильные)
 st.markdown("""
     <style>
     .stock-card {
@@ -65,6 +65,7 @@ INDUSTRIES = {
 def fetch_stocks_from_backend(category: str, industry_key: str):
     try:
         endpoint = f"{BACKEND_URL}/tsx_stocks/{category}/{industry_key}"
+        # Таймаут 60 секунд на случай холодного старта бэкенда на Render
         response = requests.get(endpoint, timeout=60)
 
         if response.status_code == 200:
@@ -98,30 +99,39 @@ def display_stocks_blocks(data):
         update_date = item.get("update_date", "N/A")
         sector = item.get("sector", "N/A")
 
-        # Расчет потенциальной выгоды / дисконта
+        # Расчет потенциальной выгоды / дисконта и подбор цвета для индикатора
         try:
             p_val = float(price)
             tp_val = float(true_price)
             benefit_pct = ((tp_val - p_val) / p_val) * 100
             benefit_str = f"{benefit_pct:+.1f}%"
+            badge_color = "rgba(46, 204, 113, 0.15)" if benefit_pct >= 0 else "rgba(231, 76, 60, 0.15)"
+            text_color = "#2ecc71" if benefit_pct >= 0 else "#e74c3c"
         except (ValueError, TypeError):
             benefit_str = "N/A"
+            badge_color = "rgba(150, 150, 150, 0.1)"
+            text_color = "inherit"
 
         with st.container():
-            # 1-я строка: Тикер и имя
-            # 2-я строка: Цифры в один ряд со значком дельта (Δ) вместо слова Opportunity
+            # Карточка компании:
+            # Строка 1: Тикер и полное название
+            # Строка 2: Цена, Справедливая стоимость и Дельта-индикатор в одну строчку
             st.markdown(f"""
             <div class="stock-card">
-                <div>📌 <b>{ticker}</b> — <i>{fullname}</i></div>
+                <div>📌 <b>{ticker}</b> — <span style="color: #666;">{fullname}</span></div>
                 <div class="stock-metrics">
-                    <div class="metric-item">💵 Price: <b>{price} {currency}</b></div>
-                    <div class="metric-item">🎯 Fair: <b>{true_price} {currency}</b></div>
-                    <div class="metric-item">Δ <b>{benefit_str}</b></div>
+                    <div class="metric-item"><span style="color: #888;">Price:</span> <b>{price} {currency}</b></div>
+                    <div class="metric-item"><span style="color: #888;">⚖️ Fair:</span> <b>{true_price} {currency}</b></div>
+                    <div class="metric-item">
+                        <span style="background-color: {badge_color}; color: {text_color}; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
+                            Δ {benefit_str}
+                        </span>
+                    </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            # 3-я строка: Детали (выпадающий список)
+            # Строка 3: Дополнительная информация в выпадающем списке
             with st.expander(f"📁 Details / Status ({ticker})"):
                 st.write(f"**Status:** {status}")
                 st.write(f"**Sector:** {sector}")
@@ -129,7 +139,7 @@ def display_stocks_blocks(data):
 
             st.markdown("---")
 
-# --- Main ---
+# --- Главное меню: переключатель категорий ---
 category_mode = st.radio(
     "Select Category view:",
     options=["🟢 Interesting Stocks (Fair Value)", "🔴 Overvalued Stocks"],
@@ -139,7 +149,7 @@ category_mode = st.radio(
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
 
-# Фрейм 1: Interesting Stocks
+# Фрейм 1: Интересные акции (Fair Value)
 if "Interesting Stocks" in category_mode:
     st.markdown("---")
     st.header("🟢 Interesting Stocks (Fair Value)")
@@ -155,7 +165,7 @@ if "Interesting Stocks" in category_mode:
             data = fetch_stocks_from_backend("fair_value", ind_key)
             display_stocks_blocks(data)
 
-# Фрейм 2: Overvalued Stocks
+# Фрейм 2: Переоцененные акции (Overvalued)
 else:
     st.markdown("---")
     st.header("🔴 Overvalued Stocks")
