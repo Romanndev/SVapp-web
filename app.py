@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# CSS-стили для гарантированного отображения цифр в одну строку на мобильных и ПК
+# CSS-стили для гарантированного отображения цифр в одну строку и компактности на ПК и мобильных
 st.markdown("""
     <style>
     .stock-card {
@@ -49,7 +49,7 @@ st.write(
 
 INDUSTRIES = {
     "Financials": "Financials",
-    "Basic_Materials": "Basic Materials",
+    "Basic_Materials": "Basic_Materials",
     "Energy": "Energy",
     "Industrials": "Industrials",
     "Consumer Discretionary": "Consumer Discretionary",
@@ -98,7 +98,7 @@ def display_stocks_blocks(data):
         update_date = item.get("update_date", "N/A")
         sector = item.get("sector", "N/A")
 
-        # Расчет потенциальной выгоды (Upside)
+        # Расчет потенциальной выгоды / дисконта
         try:
             p_val = float(price)
             tp_val = float(true_price)
@@ -108,19 +108,21 @@ def display_stocks_blocks(data):
             benefit_str = "N/A"
 
         with st.container():
-            # Карточка товара: Строка 1 — Тикер и имя, Строка 2 — Цифры в один ряд
+            # Карточка товара: 
+            # 1-я строка: Тикер и имя
+            # 2-я строка: Цифры в один ряд со значком возможностей вместо слова upside
             st.markdown(f"""
             <div class="stock-card">
                 <div>📌 <b>{ticker}</b> — <i>{fullname}</i></div>
                 <div class="stock-metrics">
                     <div class="metric-item">💵 Price: <b>{price} {currency}</b></div>
                     <div class="metric-item">🎯 Fair: <b>{true_price} {currency}</b></div>
-                    <div class="metric-item">📈 Upside: <b>{benefit_str}</b></div>
+                    <div class="metric-item">💡 Opportunity: <b>{benefit_str}</b></div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            # Строка 3: Детали (выпадающий список)
+            # 3-я строка: Детали (выпадающий список)
             with st.expander(f"📁 Details / Status ({ticker})"):
                 st.write(f"**Status:** {status}")
                 st.write(f"**Sector:** {sector}")
