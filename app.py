@@ -10,33 +10,37 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# CSS-стили для компактного отображения в одну строчку на ПК и мобильных
+# Профессиональные стили для аккуратной и компактной финансовой таблицы
 st.markdown("""
     <style>
-    .stock-card {
-        padding: 10px 14px;
-        background-color: rgba(150, 150, 150, 0.04);
-        border-radius: 8px;
-        margin-bottom: 8px;
-        border: 1px solid rgba(150, 150, 150, 0.1);
+    .stock-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 14px;
     }
-    .stock-metrics {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 20px;
-        flex-wrap: nowrap;
-        margin-top: 6px;
-        margin-bottom: 2px;
+    .stock-table th {
+        background-color: rgba(150, 150, 150, 0.06);
+        color: inherit;
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(150, 150, 150, 0.2);
+        font-weight: 600;
     }
-    .metric-item {
-        white-space: nowrap;
-        font-size: 15px;
+    .stock-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(150, 150, 150, 0.1);
+        vertical-align: middle;
+    }
+    .stock-table tr:hover {
+        background-color: rgba(150, 150, 150, 0.02);
     }
     @media (max-width: 768px) {
-        .stock-metrics {
-            gap: 12px;
-            font-size: 13px;
+        .stock-table {
+            font-size: 12px;
+        }
+        .stock-table td, .stock-table th {
+            padding: 8px 6px;
         }
     }
     </style>
@@ -74,7 +78,7 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-def display_stocks_blocks(data):
+def display_stocks_table(data):
     if not data:
         st.info("No data available for this category.")
         return
@@ -86,6 +90,20 @@ def display_stocks_blocks(data):
         items = [data]
     else:
         items = data
+
+    # Формируем компактную таблицу в HTML
+    table_html = """
+    <table class="stock-table">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Price</th>
+                <th>Fair Value</th>
+                <th>Delta</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
 
     for item in items:
         ticker = item.get("ticker", "N/A")
@@ -107,23 +125,25 @@ def display_stocks_blocks(data):
             badge_color = "rgba(150, 150, 150, 0.1)"
             text_color = "inherit"
 
-        with st.container():
-            st.markdown(f"""
-            <div class="stock-card">
-                <div>📌 <b>{ticker}</b> — <span style="color: #666;">{fullname}</span></div>
-                <div class="stock-metrics">
-                    <div class="metric-item"><span style="color: #888;">Price:</span> <b>{price} {currency}</b></div>
-                    <div class="metric-item"><span style="color: #888;">⚖️ Fair:</span> <b>{true_price} {currency}</b></div>
-                    <div class="metric-item">
-                        <span style="background-color: {badge_color}; color: {text_color}; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
-                            Δ {benefit_str}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        table_html += f"""
+            <tr>
+                <td>📌 <b>{ticker}</b> — <span style="color: #666;">{fullname}</span></td>
+                <td><b>{price} {currency}</b></td>
+                <td>⚖️ <b>{true_price} {currency}</b></td>
+                <td>
+                    <span style="background-color: {badge_color}; color: {text_color}; padding: 3px 8px; border-radius: 6px; font-weight: 600; white-space: nowrap;">
+                        Δ {benefit_str}
+                    </span>
+                </td>
+            </tr>
+        """
 
-            st.markdown("---")
+    table_html += """
+        </tbody>
+    </table>
+    """
+
+    st.markdown(table_html, unsafe_allow_html=True)
 
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
@@ -140,7 +160,7 @@ for idx, ind_key in enumerate(tab_keys):
     with buy_tabs[idx]:
         st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
         data = fetch_stocks_from_backend("fair_value", ind_key)
-        display_stocks_blocks(data)
+        display_stocks_table(data)
 
 # --- Раздел 2: Overvalued Stocks ---
 st.markdown("---")
@@ -154,4 +174,4 @@ for idx, ind_key in enumerate(tab_keys):
     with over_tabs[idx]:
         st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
         data_over = fetch_stocks_from_backend("overvalued", ind_key)
-        display_stocks_blocks(data_over)
+        display_stocks_table(data_over)
