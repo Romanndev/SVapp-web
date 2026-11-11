@@ -143,6 +143,7 @@ def display_stocks_table(data):
     </table>
     """
 
+    # Обязательно передаем unsafe_allow_html=True, чтобы Streamlit отрендерил HTML-таблицу
     st.markdown(table_html, unsafe_allow_html=True)
 
 tab_keys = list(INDUSTRIES.keys())
