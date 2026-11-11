@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 import requests
 import streamlit as st
@@ -36,6 +35,7 @@ INDUSTRIES = {
 def fetch_stocks_from_backend(category: str, industry_key: str):
     try:
         endpoint = f"{BACKEND_URL}/tsx_stocks/{category}/{industry_key}"
+        # Увеличенный таймаут (60 сек) на случай холодного старта бэкенда на Render
         response = requests.get(endpoint, timeout=60)
 
         if response.status_code == 200:
@@ -45,7 +45,7 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# Функция для красивого оформления таблиц (без статуса, даты обновления и сектора)
+# Функция для оформления таблиц (без статуса, даты обновления и сектора + с экспандером для названий)
 def display_stocks_table(data):
     if not data:
         st.info("No data available for this category.")
@@ -75,7 +75,20 @@ def display_stocks_table(data):
         columns={k: v for k, v in rename_map.items() if k in df.columns}
     )
 
+    # Выводим основную компактную таблицу
     st.dataframe(df, use_container_width=True, hide_index=True)
+
+    # Раскрывающийся блок с полными названиями компаний и деталями
+    with st.expander("🔍 Подробная информация и полные названия компаний"):
+        for _, row in df.iterrows():
+            ticker = row.get("Ticker", "N/A")
+            company_name = row.get("Company", "N/A")
+            price = row.get("Price (CAD)", "N/A")
+            true_price = row.get("Fair Value (CAD)", "N/A")
+            
+            st.markdown(f"**{ticker}** — {company_name}")
+            st.caption(f"Price: {price} | Fair Value: {true_price}")
+            st.markdown("---")
 
 # --- Main ---
 category_mode = st.radio(
