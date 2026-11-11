@@ -34,12 +34,9 @@ INDUSTRIES = {
 # Функция запроса данных с бэкенда
 @st.cache_data(ttl=300)
 def fetch_stocks_from_backend(category: str, industry_key: str):
-    """category: 'fair_value' или 'overvalued'
-    industry_key: 'Financials', 'Energy' и т.д.
-    """
     try:
         endpoint = f"{BACKEND_URL}/tsx_stocks/{category}/{industry_key}"
-        response = requests.get(endpoint, timeout=90)
+        response = requests.get(endpoint, timeout=60)
 
         if response.status_code == 200:
             return response.json()
@@ -48,14 +45,13 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# Функция для красивого оформления таблиц под ваш формат данных
+# Функция для красивого оформления таблиц (без статуса, даты обновления и сектора)
 def display_stocks_table(data):
     if not data:
         st.info("No data available for this category.")
         return
 
     if isinstance(data, dict):
-        # Если пришла ошибка или один объект словаря
         if "message" in data:
             st.warning(data["message"])
             return
@@ -63,28 +59,25 @@ def display_stocks_table(data):
     else:
         df = pd.DataFrame(data)
 
-    # Переименуем колонки для красивого отображения пользователю
+    # Удаляем колонки: статус, дата обновления, сектор
+    cols_to_drop = ["status", "update_date", "sector"]
+    df = df.drop(columns=[col for col in cols_to_drop if col in df.columns])
+
+    # Переименуем оставшиеся колонки
     rename_map = {
         "ticker": "Ticker",
         "fullname": "Company",
         "price": "Price (CAD)",
         "true_price": "Fair Value (CAD)",
         "currency": "Currency",
-        "status": "Status",
-        "update_date": "Update Date",
-        "sector": "Sector",
     }
     df = df.rename(
         columns={k: v for k, v in rename_map.items() if k in df.columns}
     )
 
-    # Выводим адаптивную интерактивную таблицу Streamlit
     st.dataframe(df, use_container_width=True, hide_index=True)
 
-#--------------------------- main ---------------------------------------------
-
-# Мобильная адаптация фильтра категорий через selectbox в боковой панели или вверху
-# На мобильных устройствах пользователи часто предпочитают переключаться через выпадающий список или радиокнопки
+# --- Main ---
 category_mode = st.radio(
     "Select Category view:",
     options=["🟢 Interesting Stocks (Fair Value)", "🔴 Overvalued Stocks"],
@@ -94,7 +87,7 @@ category_mode = st.radio(
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
 
-# --- ФРЕЙМ 1: Интересные акции для покупки (Fair Value) ---
+# Фрейм 1: Interesting Stocks
 if "Interesting Stocks" in category_mode:
     st.markdown("---")
     st.header("🟢 Interesting Stocks (Fair Value)")
@@ -107,12 +100,10 @@ if "Interesting Stocks" in category_mode:
     for idx, ind_key in enumerate(tab_keys):
         with buy_tabs[idx]:
             st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
-
-            # Запрос данных для справедливой стоимости
             data = fetch_stocks_from_backend("fair_value", ind_key)
             display_stocks_table(data)
 
-# --- ФРЕЙМ 2: Переоцененные акции (Overvalued) ---
+# Фрейм 2: Overvalued Stocks
 else:
     st.markdown("---")
     st.header("🔴 Overvalued Stocks")
@@ -125,7 +116,5 @@ else:
     for idx, ind_key in enumerate(tab_keys):
         with over_tabs[idx]:
             st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
-
-            # Запрос данных для переоцененных акций
             data_over = fetch_stocks_from_backend("overvalued", ind_key)
             display_stocks_table(data_over)
