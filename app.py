@@ -10,6 +10,31 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
+# Профессиональные стили: выделение активных вкладок индустрий и компактные карточки
+st.markdown("""
+    <style>
+    /* Кастомизация вкладок (tabs) для максимальной заметности */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 40px;
+        background-color: rgba(150, 150, 150, 0.05);
+        border-radius: 6px;
+        padding-left: 14px;
+        padding-right: 14px;
+        font-weight: 500;
+        border: 1px solid rgba(150, 150, 150, 0.1);
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: rgba(46, 204, 113, 0.15) !important;
+        border: 1px solid #2ecc71 !important;
+        color: #2ecc71 !important;
+        font-weight: 700 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("📊 Stocks Screener (TSX-Index VCN)")
 st.write(
     "Fair value and margin of safety analysis of stocks by industry. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
@@ -75,7 +100,7 @@ def display_stocks_table(data):
             badge_color = "rgba(150, 150, 150, 0.1)"
             text_color = "inherit"
 
-        # Карточка с фиксированным расположением метрик в одну строку
+        # Карточка с фиксированным расположением метрик в одну строку (адаптивная под мобильные)
         st.markdown(f"""
         <div style="
             padding: 10px 14px;
@@ -112,32 +137,33 @@ def display_stocks_table(data):
         </div>
         """, unsafe_allow_html=True)
 
-# Выделенный фильтр по индустриям (общий для обоих разделов)
-selected_industry_label = st.selectbox(
-    "🔍 Select Industry Filter:",
-    options=list(INDUSTRIES.values()),
-    index=0
-)
-
-# Находим ключ выбранной индустрии по ее названию
-selected_industry_key = [k for k, v in INDUSTRIES.items() if v == selected_industry_label][0]
+tab_keys = list(INDUSTRIES.keys())
+tab_labels = list(INDUSTRIES.values())
 
 # --- Раздел 1: Interesting Stocks (Fair Value) ---
 st.markdown("---")
 st.header("🟢 Interesting Stocks (Fair Value)")
 st.write(
-    f"Companies with attractive valuation in **{selected_industry_label}**. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
+    "Companies with attractive valuation and potential according to the evaluation model. NOT FINANCIAL ADVICE."
 )
 
-data_fair = fetch_stocks_from_backend("fair_value", selected_industry_key)
-display_stocks_table(data_fair)
+buy_tabs = st.tabs(tab_labels)
+for idx, ind_key in enumerate(tab_keys):
+    with buy_tabs[idx]:
+        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
+        data = fetch_stocks_from_backend("fair_value", ind_key)
+        display_stocks_table(data)
 
 # --- Раздел 2: Overvalued Stocks ---
 st.markdown("---")
 st.header("🔴 Overvalued Stocks")
 st.write(
-    f"Companies trading above fair value in **{selected_industry_label}**. NOT FINANCIAL ADVICE."
+    "Companies are trading above their calculated fair value according to the evaluation model. NOT FINANCIAL ADVICE."
 )
 
-data_over = fetch_stocks_from_backend("overvalued", selected_industry_key)
-display_stocks_table(data_over)
+over_tabs = st.tabs(tab_labels)
+for idx, ind_key in enumerate(tab_keys):
+    with over_tabs[idx]:
+        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
+        data_over = fetch_stocks_from_backend("overvalued", ind_key)
+        display_stocks_table(data_over)
