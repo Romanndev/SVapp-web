@@ -1,21 +1,21 @@
 import os
+
 import pandas as pd
 import requests
 import streamlit as st
 
-# Базовый URL бэкенда
 BACKEND_URL = os.getenv("BACKEND_URL", "https://svapp-r5d4.onrender.com")
 
 st.set_page_config(
-    page_title="Canadian Stocks Screener", page_icon="📊", layout="wide"
+    page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-st.title("📊 Canadian Stocks Screener (TSX-Index VCN)")
+st.title("📊 Stocks Screener (TSX-Index VCN)")
 st.write(
     "Fair value and margin of safety analysis of stocks by industry. Based on Benjamin Graham's principles. NOT FINANCIAL ADVICE."
 )
 
-# Список отраслей, доступных на бэкенде
+
 INDUSTRIES = {
     "Financials": "Financials",
     "Basic_Materials": "Basic Materials",
@@ -30,7 +30,7 @@ INDUSTRIES = {
     "Real Estate": "Real Estate",
 }
 
-# Функция запроса данных с бэкенда
+
 @st.cache_data(ttl=300)
 def fetch_stocks_from_backend(category: str, industry_key: str):
     try:
@@ -44,7 +44,7 @@ def fetch_stocks_from_backend(category: str, industry_key: str):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# Функция для отображения акций в виде аккуратных блоков вместо таблиц
+
 def display_stocks_blocks(data):
     if not data:
         st.info("No data available for this category.")
@@ -59,20 +59,20 @@ def display_stocks_blocks(data):
     else:
         items = data
 
-    # Перебираем каждую акцию и выводим в виде стильного блока
+    
     for item in items:
         ticker = item.get("ticker", "N/A")
         fullname = item.get("fullname", "N/A")
         price = item.get("price", "N/A")
         true_price = item.get("true_price", "N/A")
-        currency = item.get("currency", "") # Получаем тип валюты (например, CAD)
+        currency = item.get("currency", "") 
 
-        # Заголовок блока: тикер + полное название компании
+        
         with st.expander(f"📌 **{ticker}** — {fullname}"):
-            # Выводим цену и справедливую стоимость с добавлением валюты
+            
             st.markdown(f"**Price:** {price} {currency} &nbsp;|&nbsp; **Fair Value:** {true_price} {currency}")
             
-            # Если нужно вывести дополнительные скрытые или детальные поля:
+            
             status = item.get("status")
             update_date = item.get("update_date")
             sector = item.get("sector")
