@@ -108,9 +108,6 @@ def display_stocks_blocks(data):
             text_color = "inherit"
 
         with st.container():
-            # Аккуратная карточка без разделов деталей:
-            # 1-я строка: Тикер и название компании
-            # 2-я строка: Цена, справедливая стоимость и дельта-индикатор в одну строчку
             st.markdown(f"""
             <div class="stock-card">
                 <div>📌 <b>{ticker}</b> — <span style="color: #666;">{fullname}</span></div>
@@ -128,44 +125,33 @@ def display_stocks_blocks(data):
 
             st.markdown("---")
 
-# --- Main ---
-category_mode = st.radio(
-    "Select Category view:",
-    options=["🟢 Interesting Stocks (Fair Value)", "🔴 Overvalued Stocks"],
-    horizontal=True
-)
-
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
 
-# Фрейм 1: Interesting Stocks
-if "Interesting Stocks" in category_mode:
-    st.markdown("---")
-    st.header("🟢 Interesting Stocks (Fair Value)")
-    st.write(
-        "Companies with attractive valuation and potential according to the evaluation model. NOT FINANCIAL ADVICE."
-    )
+# --- Раздел 1: Interesting Stocks (Fair Value) ---
+st.markdown("---")
+st.header("🟢 Interesting Stocks (Fair Value)")
+st.write(
+    "Companies with attractive valuation and potential according to the evaluation model. NOT FINANCIAL ADVICE."
+)
 
-    buy_tabs = st.tabs(tab_labels)
+buy_tabs = st.tabs(tab_labels)
+for idx, ind_key in enumerate(tab_keys):
+    with buy_tabs[idx]:
+        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
+        data = fetch_stocks_from_backend("fair_value", ind_key)
+        display_stocks_blocks(data)
 
-    for idx, ind_key in enumerate(tab_keys):
-        with buy_tabs[idx]:
-            st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
-            data = fetch_stocks_from_backend("fair_value", ind_key)
-            display_stocks_blocks(data)
+# --- Раздел 2: Overvalued Stocks ---
+st.markdown("---")
+st.header("🔴 Overvalued Stocks")
+st.write(
+    "Companies are trading above their calculated fair value according to the evaluation model. NOT FINANCIAL ADVICE."
+)
 
-# Фрейм 2: Overvalued Stocks
-else:
-    st.markdown("---")
-    st.header("🔴 Overvalued Stocks")
-    st.write(
-        "Companies are trading above their calculated fair value according to the evaluation model. NOT FINANCIAL ADVICE."
-    )
-
-    over_tabs = st.tabs(tab_labels)
-
-    for idx, ind_key in enumerate(tab_keys):
-        with over_tabs[idx]:
-            st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
-            data_over = fetch_stocks_from_backend("overvalued", ind_key)
-            display_stocks_blocks(data_over)
+over_tabs = st.tabs(tab_labels)
+for idx, ind_key in enumerate(tab_keys):
+    with over_tabs[idx]:
+        st.subheader(f"Industry: {INDUSTRIES[ind_key]}")
+        data_over = fetch_stocks_from_backend("overvalued", ind_key)
+        display_stocks_blocks(data_over)
