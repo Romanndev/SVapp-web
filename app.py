@@ -10,10 +10,10 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Современные стили (актуальный финтех-дизайн без кислотных плашек)
+# Современные стили: делаем текст вкладок индустрий более жирным и выразительным
 st.markdown("""
     <style>
-    /* Современный сброс и настройка вкладок (Tabs) */
+    /* Современная настройка вкладок (Tabs) с акцентным жирным шрифтом */
     .stTabs [data-baseweb="tab-list"] {
         gap: 12px;
         border-bottom: 1px solid rgba(150, 150, 150, 0.15);
@@ -25,8 +25,9 @@ st.markdown("""
         border-radius: 4px;
         padding-left: 10px;
         padding-right: 10px;
-        font-weight: 500;
-        color: #888;
+        font-weight: 600; /* Более жирный шрифт для всех индустрий */
+        font-size: 15px;  /* Чуть крупнее для читаемости */
+        color: #777;
         border: none;
         transition: all 0.2s ease;
     }
@@ -34,12 +35,12 @@ st.markdown("""
         color: inherit;
         background-color: rgba(150, 150, 150, 0.05);
     }
-    /* Активная вкладка: строгий жирный шрифт, акцентный цвет и современное нижнее подчеркивание */
+    /* Активная вкладка: максимальная плотность шрифта и строгое нижнее подчеркивание */
     .stTabs [aria-selected="true"] {
         background-color: transparent !important;
         color: inherit !important;
-        font-weight: 700 !important;
-        box-shadow: inset 0 -2px 0 0 #2ecc71;
+        font-weight: 800 !important;
+        box-shadow: inset 0 -2.5px 0 0 #2ecc71;
     }
     
     /* Карточки акций */
