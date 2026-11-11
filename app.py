@@ -3,14 +3,14 @@ import pandas as pd
 import requests
 import streamlit as st
 
-# Базовый URL бэкенда (подтягивается из secrets Streamlit или os.getenv, либо фоллбек на ваш Render)
-BACKEND_URL = st.secrets.get("BACKEND_URL", os.getenv("BACKEND_URL", "https://svapp-r5d4.onrender.com"))
+# Базовый URL бэкенда
+BACKEND_URL = os.getenv("BACKEND_URL", "https://svapp-r5d4.onrender.com")
 
 st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Профессиональные стили: компактное расположение метрик в один ряд на любых экранах (ПК и мобильные)
+# CSS-стили для компактного отображения в одну строчку на ПК и мобильных
 st.markdown("""
     <style>
     .stock-card {
@@ -27,7 +27,7 @@ st.markdown("""
         gap: 20px;
         flex-wrap: nowrap;
         margin-top: 6px;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
     .metric-item {
         white-space: nowrap;
@@ -65,7 +65,6 @@ INDUSTRIES = {
 def fetch_stocks_from_backend(category: str, industry_key: str):
     try:
         endpoint = f"{BACKEND_URL}/tsx_stocks/{category}/{industry_key}"
-        # Таймаут 60 секунд на случай холодного старта бэкенда на Render
         response = requests.get(endpoint, timeout=60)
 
         if response.status_code == 200:
@@ -95,11 +94,7 @@ def display_stocks_blocks(data):
         true_price = item.get("true_price", "N/A")
         currency = item.get("currency", "CAD")
 
-        status = item.get("status", "N/A")
-        update_date = item.get("update_date", "N/A")
-        sector = item.get("sector", "N/A")
-
-        # Расчет потенциальной выгоды / дисконта и подбор цвета для индикатора
+        # Расчет потенциальной выгоды / дисконта и цвета для дельты
         try:
             p_val = float(price)
             tp_val = float(true_price)
@@ -113,9 +108,9 @@ def display_stocks_blocks(data):
             text_color = "inherit"
 
         with st.container():
-            # Карточка компании:
-            # Строка 1: Тикер и полное название
-            # Строка 2: Цена, Справедливая стоимость и Дельта-индикатор в одну строчку
+            # Аккуратная карточка без разделов деталей:
+            # 1-я строка: Тикер и название компании
+            # 2-я строка: Цена, справедливая стоимость и дельта-индикатор в одну строчку
             st.markdown(f"""
             <div class="stock-card">
                 <div>📌 <b>{ticker}</b> — <span style="color: #666;">{fullname}</span></div>
@@ -131,15 +126,9 @@ def display_stocks_blocks(data):
             </div>
             """, unsafe_allow_html=True)
 
-            # Строка 3: Дополнительная информация в выпадающем списке
-            with st.expander(f"📁 Details / Status ({ticker})"):
-                st.write(f"**Status:** {status}")
-                st.write(f"**Sector:** {sector}")
-                st.write(f"**Updated:** {update_date}")
-
             st.markdown("---")
 
-# --- Главное меню: переключатель категорий ---
+# --- Main ---
 category_mode = st.radio(
     "Select Category view:",
     options=["🟢 Interesting Stocks (Fair Value)", "🔴 Overvalued Stocks"],
@@ -149,7 +138,7 @@ category_mode = st.radio(
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
 
-# Фрейм 1: Интересные акции (Fair Value)
+# Фрейм 1: Interesting Stocks
 if "Interesting Stocks" in category_mode:
     st.markdown("---")
     st.header("🟢 Interesting Stocks (Fair Value)")
@@ -165,7 +154,7 @@ if "Interesting Stocks" in category_mode:
             data = fetch_stocks_from_backend("fair_value", ind_key)
             display_stocks_blocks(data)
 
-# Фрейм 2: Переоцененные акции (Overvalued)
+# Фрейм 2: Overvalued Stocks
 else:
     st.markdown("---")
     st.header("🔴 Overvalued Stocks")
