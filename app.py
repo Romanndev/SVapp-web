@@ -10,37 +10,19 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Профессиональные стили для аккуратной и компактной финансовой таблицы
+# Профессиональные стили для аккуратных карточек-строк
 st.markdown("""
     <style>
-    .stock-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
-    .stock-table th {
-        background-color: rgba(150, 150, 150, 0.06);
-        color: inherit;
-        text-align: left;
-        padding: 10px 12px;
-        border-bottom: 1px solid rgba(150, 150, 150, 0.2);
-        font-weight: 600;
-    }
-    .stock-table td {
-        padding: 10px 12px;
-        border-bottom: 1px solid rgba(150, 150, 150, 0.1);
-        vertical-align: middle;
-    }
-    .stock-table tr:hover {
-        background-color: rgba(150, 150, 150, 0.02);
+    .stock-card {
+        padding: 8px 12px;
+        background-color: rgba(150, 150, 150, 0.03);
+        border-radius: 6px;
+        margin-bottom: 6px;
+        border: 1px solid rgba(150, 150, 150, 0.08);
     }
     @media (max-width: 768px) {
-        .stock-table {
-            font-size: 12px;
-        }
-        .stock-table td, .stock-table th {
-            padding: 8px 6px;
+        .stock-card {
+            padding: 6px 8px;
         }
     }
     </style>
@@ -91,19 +73,6 @@ def display_stocks_table(data):
     else:
         items = data
 
-    table_html = """
-    <table class="stock-table">
-        <thead>
-            <tr>
-                <th>Company</th>
-                <th>Price</th>
-                <th>Fair Value</th>
-                <th>Delta</th>
-            </tr>
-        </thead>
-        <tbody>
-    """
-
     for item in items:
         ticker = item.get("ticker", "N/A")
         fullname = item.get("fullname", "N/A")
@@ -124,25 +93,27 @@ def display_stocks_table(data):
             badge_color = "rgba(150, 150, 150, 0.1)"
             text_color = "inherit"
 
-        table_html += f"""
-            <tr>
-                <td>📌 <b>{ticker}</b> — <span style="color: #666;">{fullname}</span></td>
-                <td><b>{price} {currency}</b></td>
-                <td>⚖️ <b>{true_price} {currency}</b></td>
-                <td>
-                    <span style="background-color: {badge_color}; color: {text_color}; padding: 3px 8px; border-radius: 6px; font-weight: 600; white-space: nowrap;">
-                        Δ {benefit_str}
-                    </span>
-                </td>
-            </tr>
-        """
-
-    table_html += """
-        </tbody>
-    </table>
-    """
-
-    st.markdown(table_html, unsafe_allow_html=True)
+        # Отрисовка строки через безопасные колонки Streamlit
+        with st.container():
+            st.markdown('<div class="stock-card">', unsafe_allow_html=True)
+            
+            c1, c2, c3, c4 = st.columns([3, 1.5, 1.5, 1.5])
+            
+            with c1:
+                st.markdown(f"📌 **{ticker}** — <span style='color: #666;'>{fullname}</span>", unsafe_allow_html=True)
+            with c2:
+                st.markdown(f"<span style='color: #888; font-size: 12px;'>Price</span><br><b>{price} {currency}</b>", unsafe_allow_html=True)
+            with c3:
+                st.markdown(f"<span style='color: #888; font-size: 12px;'>Fair Value</span><br>⚖️ <b>{true_price} {currency}</b>", unsafe_allow_html=True)
+            with c4:
+                st.markdown(f"""
+                <span style='color: #888; font-size: 12px;'>Delta</span><br>
+                <span style="background-color: {badge_color}; color: {text_color}; padding: 2px 8px; border-radius: 6px; font-weight: 600; display: inline-block; white-space: nowrap;">
+                    Δ {benefit_str}
+                </span>
+                """, unsafe_allow_html=True)
+                
+            st.markdown('</div>', unsafe_allow_html=True)
 
 tab_keys = list(INDUSTRIES.keys())
 tab_labels = list(INDUSTRIES.values())
