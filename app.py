@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# CSS-стили для гарантированного отображения цифр в одну строку и компактности на ПК и мобильных
+# CSS-стили для компактного отображения цифр в одну строчку на любых экранах
 st.markdown("""
     <style>
     .stock-card {
@@ -49,7 +49,7 @@ st.write(
 
 INDUSTRIES = {
     "Financials": "Financials",
-    "Basic_Materials": "Basic_Materials",
+    "Basic_Materials": "Basic Materials",
     "Energy": "Energy",
     "Industrials": "Industrials",
     "Consumer Discretionary": "Consumer Discretionary",
@@ -108,16 +108,15 @@ def display_stocks_blocks(data):
             benefit_str = "N/A"
 
         with st.container():
-            # Карточка товара: 
             # 1-я строка: Тикер и имя
-            # 2-я строка: Цифры в один ряд со значком возможностей вместо слова upside
+            # 2-я строка: Цифры в один ряд со значком дельта (Δ) вместо слова Opportunity
             st.markdown(f"""
             <div class="stock-card">
                 <div>📌 <b>{ticker}</b> — <i>{fullname}</i></div>
                 <div class="stock-metrics">
                     <div class="metric-item">💵 Price: <b>{price} {currency}</b></div>
                     <div class="metric-item">🎯 Fair: <b>{true_price} {currency}</b></div>
-                    <div class="metric-item">💡 Opportunity: <b>{benefit_str}</b></div>
+                    <div class="metric-item">Δ <b>{benefit_str}</b></div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
