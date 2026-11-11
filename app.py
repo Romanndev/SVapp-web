@@ -10,15 +10,28 @@ st.set_page_config(
     page_title="Stocks Screener", page_icon="📊", layout="wide"
 )
 
-# Легкие CSS-стили для аккуратных карточек
+# Точечные CSS стили для адаптивности:
+# 1. На мобильных и ПК цифры всегда выстраиваются в один ряд вплотную друг к другу.
+# 2. Убираем лишние отступы на ПК, чтобы они не были "на расстоянии выстрела".
 st.markdown("""
     <style>
+    /* Принудительный ряд для колонок цифр на любых экранах */
+    [data-testid="column"] {
+        width: fit-content !important;
+        flex: 1 !important;
+        min-width: 90px !important;
+    }
+    div.row-widget.stHorizontal {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
     .stock-card {
-        padding: 10px 14px;
-        background-color: rgba(150, 150, 150, 0.04);
-        border-radius: 8px;
-        margin-bottom: 8px;
-        border: 1px solid rgba(150, 150, 150, 0.1);
+        padding: 8px 12px;
+        background-color: rgba(150, 150, 150, 0.03);
+        border-radius: 6px;
+        margin-bottom: 6px;
+        border: 1px solid rgba(150, 150, 150, 0.08);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -89,10 +102,12 @@ def display_stocks_blocks(data):
             benefit_str = "N/A"
 
         with st.container():
+            st.markdown('<div class="stock-card">', unsafe_allow_html=True)
+            
             # 1. Первая строка: Тикер и название компании
             st.markdown(f"📌 **{ticker}** — *{fullname}*")
 
-            # 2. Вторая строка: Все цифры строго в одну линию через колонки
+            # 2. Вторая строка: Цифры строго в одну линию и компактно
             col1, col2, col3 = st.columns(3)
             with col1:
                 st.markdown(f"💵 Price: **{price} {currency}**")
@@ -107,6 +122,7 @@ def display_stocks_blocks(data):
                 st.write(f"**Sector:** {sector}")
                 st.write(f"**Updated:** {update_date}")
 
+            st.markdown('</div>', unsafe_allow_html=True)
             st.markdown("---")
 
 # --- Main ---
